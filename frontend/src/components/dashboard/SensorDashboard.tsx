@@ -82,6 +82,7 @@ export default function SensorDashboard() {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dataCounterRef = useRef(0);
+  const isMountedRef = useRef(true);
 
   // Parse websocket payload dynamically to handle different naming schemas
   const parsePayload = (rawString: string): TelemetryPacket | null => {
@@ -134,8 +135,12 @@ export default function SensorDashboard() {
 
   const connectWebSocket = () => {
     if (wsRef.current) {
+      wsRef.current.onclose = null;
+      wsRef.current.onerror = null;
       wsRef.current.close();
     }
+
+    if (!isMountedRef.current) return;
 
     setConnectionStatus((prev) =>
       prev === "DISCONNECTED" ? "CONNECTING" : "RECONNECTING"
@@ -146,11 +151,16 @@ export default function SensorDashboard() {
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (!isMountedRef.current) {
+          ws.close();
+          return;
+        }
         setConnectionStatus("CONNECTED");
         console.log("WebSocket Connection Established:", wsUrl);
       };
 
       ws.onmessage = (event) => {
+        if (!isMountedRef.current) return;
         const parsed = parsePayload(event.data);
         if (parsed) {
           setMessageCount((c) => c + 1);
@@ -173,29 +183,42 @@ export default function SensorDashboard() {
       };
 
       ws.onerror = (error) => {
+        if (!isMountedRef.current) return;
         console.error("WebSocket Error:", error);
       };
 
       ws.onclose = () => {
-        setConnectionStatus("DISCONNECTED");
-        console.log("WebSocket Connection Closed. Reattempting in 2s...");
-        // Auto-reconnect loop
-        reconnectTimeoutRef.current = setTimeout(() => {
-          connectWebSocket();
-        }, 2000);
+        if (!isMountedRef.current) return;
+
+        // Only trigger reconnect if this is still the active WebSocket instance
+        if (wsRef.current === ws) {
+          setConnectionStatus("DISCONNECTED");
+          console.log("WebSocket Connection Closed. Reattempting in 2s...");
+          // Auto-reconnect loop
+          reconnectTimeoutRef.current = setTimeout(() => {
+            if (isMountedRef.current) {
+              connectWebSocket();
+            }
+          }, 2000);
+        }
       };
     } catch (err) {
       console.error("WebSocket Connection Exception:", err);
-      setConnectionStatus("DISCONNECTED");
+      if (isMountedRef.current) {
+        setConnectionStatus("DISCONNECTED");
+      }
     }
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
     connectWebSocket();
 
     return () => {
+      isMountedRef.current = false;
       if (wsRef.current) {
-        wsRef.current.onclose = null; // Prevent reconnect loop trigger on manual unmount
+        wsRef.current.onclose = null;
+        wsRef.current.onerror = null;
         wsRef.current.close();
       }
       if (reconnectTimeoutRef.current) {
