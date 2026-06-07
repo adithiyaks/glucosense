@@ -230,6 +230,15 @@ export default function SensorDashboard() {
   // Compute metrics
   const totalG = Math.sqrt(latestData.x ** 2 + latestData.y ** 2 + latestData.z ** 2);
 
+  // Apply a dead zone threshold and lower sensitivity to prevent erratic rotations in the 3D cube simulation
+  const getTiltRotation = (val: number) => {
+    const threshold = 0.05; // 0.05g dead zone threshold
+    const sensitivity = 30; // Reduced from 45 to make rotation more stable and controlled
+    const absVal = Math.abs(val);
+    if (absVal < threshold) return 0;
+    return Math.sign(val) * (absVal - threshold) * sensitivity;
+  };
+
   // Normalize temp for gauge: Min 30C, Max 45C
   const minTemp = 30;
   const maxTemp = 45;
@@ -561,8 +570,8 @@ export default function SensorDashboard() {
             <motion.div
               className="w-20 h-20 relative preserve-3d"
               animate={{
-                rotateX: -latestData.y * 45, // Pitch
-                rotateY: latestData.x * 45, // Roll
+                rotateX: -getTiltRotation(latestData.y), // Pitch
+                rotateY: getTiltRotation(latestData.x), // Roll
               }}
               transition={{ type: "spring", stiffness: 80, damping: 15 }}
               style={{ transformStyle: "preserve-3d" }}

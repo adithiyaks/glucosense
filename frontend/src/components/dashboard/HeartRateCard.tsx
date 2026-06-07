@@ -1,5 +1,4 @@
-"use client";
-
+import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
 import { Heart } from "lucide-react";
@@ -11,6 +10,15 @@ interface HeartRateCardProps {
 }
 
 export function HeartRateCard({ currentHR, data }: HeartRateCardProps) {
+  const [smoothedHR, setSmoothedHR] = useState(currentHR);
+
+  useEffect(() => {
+    // Exponential Moving Average (EMA) smoothing
+    // Helps smooth out rapid fluctuations from 10Hz readings
+    const alpha = 0.15;
+    setSmoothedHR((prev) => Math.round(prev * (1 - alpha) + currentHR * alpha));
+  }, [currentHR]);
+
   return (
     <GlassCard className="flex flex-col h-48 justify-between relative group">
       <div className="flex justify-between items-start z-10 relative">
@@ -20,7 +28,7 @@ export function HeartRateCard({ currentHR, data }: HeartRateCardProps) {
           </p>
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-bold text-slate-50 font-mono tracking-tight">
-              {currentHR}
+              {smoothedHR}
             </span>
             <span className="text-sm font-medium text-slate-400">bpm</span>
           </div>
@@ -29,7 +37,7 @@ export function HeartRateCard({ currentHR, data }: HeartRateCardProps) {
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{
-              duration: 60 / Math.max(currentHR, 60), // pulse based on HR roughly
+              duration: 60 / Math.max(smoothedHR, 60), // pulse based on HR roughly
               repeat: Infinity,
               ease: "easeInOut",
             }}
