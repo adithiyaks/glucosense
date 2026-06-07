@@ -77,7 +77,7 @@ export default function SensorDashboard() {
   });
   const [chartHistory, setChartHistory] = useState<ChartDataPoint[]>([]);
   const [messageCount, setMessageCount] = useState(0);
-  const [wsUrl, setWsUrl] = useState("wss://glucosense-0y79.onrender.com/ws/sensor");
+  const [wsUrl, setWsUrl] = useState("wss://glucosense-0y79.onrender.com/ws/frontend");
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -272,7 +272,7 @@ export default function SensorDashboard() {
               )}
             </div>
             <span className={`text-xs font-bold uppercase tracking-wider ${connectionStatus === "CONNECTED" ? "text-emerald-400" :
-                connectionStatus === "DISCONNECTED" ? "text-red-400" : "text-amber-400"
+              connectionStatus === "DISCONNECTED" ? "text-red-400" : "text-amber-400"
               }`}>
               {connectionStatus}
             </span>
