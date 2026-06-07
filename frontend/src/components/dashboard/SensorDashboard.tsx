@@ -2,24 +2,24 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence, animate } from "framer-motion";
-import { 
-  ResponsiveContainer, 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Legend, 
-  CartesianGrid 
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid
 } from "recharts";
-import { 
-  Activity, 
-  Wifi, 
-  WifiOff, 
-  RefreshCw, 
-  Thermometer, 
-  Move3d, 
-  TrendingUp, 
+import {
+  Activity,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  Thermometer,
+  Move3d,
+  TrendingUp,
   Gauge,
   Info
 } from "lucide-react";
@@ -77,8 +77,8 @@ export default function SensorDashboard() {
   });
   const [chartHistory, setChartHistory] = useState<ChartDataPoint[]>([]);
   const [messageCount, setMessageCount] = useState(0);
-  const [wsUrl, setWsUrl] = useState("ws://localhost:8000/ws/sensor");
-  
+  const [wsUrl, setWsUrl] = useState("wss://glucosense-0y79.onrender.com/ws/sensor");
+
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dataCounterRef = useRef(0);
@@ -87,7 +87,7 @@ export default function SensorDashboard() {
   const parsePayload = (rawString: string): TelemetryPacket | null => {
     try {
       const parsed = JSON.parse(rawString);
-      
+
       let x = 0;
       let y = 0;
       let z = 1.0;
@@ -137,7 +137,7 @@ export default function SensorDashboard() {
       wsRef.current.close();
     }
 
-    setConnectionStatus((prev) => 
+    setConnectionStatus((prev) =>
       prev === "DISCONNECTED" ? "CONNECTING" : "RECONNECTING"
     );
 
@@ -206,7 +206,7 @@ export default function SensorDashboard() {
 
   // Compute metrics
   const totalG = Math.sqrt(latestData.x ** 2 + latestData.y ** 2 + latestData.z ** 2);
-  
+
   // Normalize temp for gauge: Min 30C, Max 45C
   const minTemp = 30;
   const maxTemp = 45;
@@ -228,7 +228,7 @@ export default function SensorDashboard() {
   return (
     <div className="w-full max-w-7xl mx-auto p-4 space-y-6 text-slate-100 min-h-screen flex flex-col justify-between">
       {/* Premium Dashboard Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -271,24 +271,23 @@ export default function SensorDashboard() {
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 shadow-[0_0_8px_#ef4444]"></span>
               )}
             </div>
-            <span className={`text-xs font-bold uppercase tracking-wider ${
-              connectionStatus === "CONNECTED" ? "text-emerald-400" :
-              connectionStatus === "DISCONNECTED" ? "text-red-400" : "text-amber-400"
-            }`}>
+            <span className={`text-xs font-bold uppercase tracking-wider ${connectionStatus === "CONNECTED" ? "text-emerald-400" :
+                connectionStatus === "DISCONNECTED" ? "text-red-400" : "text-amber-400"
+              }`}>
               {connectionStatus}
             </span>
           </div>
 
           {/* Config URL Button */}
           <div className="flex items-center rounded-2xl overflow-hidden bg-slate-950/60 border border-slate-800/80 p-0.5">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={wsUrl}
               onChange={(e) => setWsUrl(e.target.value)}
               className="bg-transparent px-3 py-1.5 text-xs font-mono text-slate-300 w-44 md:w-56 focus:outline-none focus:ring-0"
               placeholder="ws://localhost:8000/..."
             />
-            <button 
+            <button
               onClick={connectWebSocket}
               className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all cursor-pointer m-1"
               title="Manual Reconnect"
@@ -306,7 +305,7 @@ export default function SensorDashboard() {
 
       {/* Bento Box Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
+
         {/* Card 1: Live Kinematic Waveforms (Main Chart) - Span 2 Cols */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -315,7 +314,7 @@ export default function SensorDashboard() {
           className="md:col-span-2 bg-slate-900/30 border border-slate-800/80 rounded-3xl overflow-hidden relative group backdrop-blur-md shadow-2xl h-[420px] flex flex-col justify-between p-6"
         >
           <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/[0.02] to-transparent pointer-events-none" />
-          
+
           <div className="flex justify-between items-start mb-4 z-10">
             <div>
               <h2 className="text-lg font-bold text-slate-50 tracking-tight flex items-center gap-2">
@@ -326,7 +325,7 @@ export default function SensorDashboard() {
                 Real-time mapping of acceleration forces (X, Y, Z axes)
               </p>
             </div>
-            
+
             <div className="flex items-center gap-3 font-mono text-[11px] text-slate-400 bg-slate-950/40 px-3 py-1.5 rounded-xl border border-slate-800/50">
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> X
@@ -349,38 +348,38 @@ export default function SensorDashboard() {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart 
-                  data={chartHistory} 
+                <LineChart
+                  data={chartHistory}
                   margin={{ top: 5, right: 5, left: -25, bottom: 5 }}
                 >
                   <defs>
                     <linearGradient id="colorX" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorY" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#818cf8" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#818cf8" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#818cf8" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorZ" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ec4899" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#ec4899" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#ec4899" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b/40" vertical={false} />
-                  <XAxis 
-                    dataKey="index" 
-                    hide 
+                  <XAxis
+                    dataKey="index"
+                    hide
                   />
-                  <YAxis 
-                    domain={[-3, 3]} 
-                    tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} 
-                    axisLine={false} 
-                    tickLine={false} 
+                  <YAxis
+                    domain={[-3, 3]}
+                    tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(15, 23, 42, 0.9)', 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(15, 23, 42, 0.9)',
                       borderColor: 'rgba(51, 65, 85, 0.5)',
                       borderRadius: '16px',
                       color: '#f8fafc',
@@ -389,28 +388,28 @@ export default function SensorDashboard() {
                     }}
                     labelStyle={{ color: '#94a3b8' }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="x" 
-                    stroke="#06b6d4" 
-                    strokeWidth={2.5} 
-                    dot={false} 
+                  <Line
+                    type="monotone"
+                    dataKey="x"
+                    stroke="#06b6d4"
+                    strokeWidth={2.5}
+                    dot={false}
                     isAnimationActive={false}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="y" 
-                    stroke="#818cf8" 
-                    strokeWidth={2.5} 
-                    dot={false} 
+                  <Line
+                    type="monotone"
+                    dataKey="y"
+                    stroke="#818cf8"
+                    strokeWidth={2.5}
+                    dot={false}
                     isAnimationActive={false}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="z" 
-                    stroke="#ec4899" 
-                    strokeWidth={2.5} 
-                    dot={false} 
+                  <Line
+                    type="monotone"
+                    dataKey="z"
+                    stroke="#ec4899"
+                    strokeWidth={2.5}
+                    dot={false}
                     isAnimationActive={false}
                   />
                 </LineChart>
@@ -550,7 +549,7 @@ export default function SensorDashboard() {
               <div className="absolute inset-0 border-2 border-purple-400/50 bg-purple-950/20 transform translate-z-5 rounded-xl flex items-center justify-center">
                 <div className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_#06b6d4]" />
               </div>
-              
+
               {/* Grid / Axis guides */}
               <div className="absolute top-1/2 left-1/2 w-[160%] h-px bg-rose-500/40 transform -translate-x-1/2 -translate-y-1/2" />
               <div className="absolute top-1/2 left-1/2 h-[160%] w-px bg-emerald-500/40 transform -translate-x-1/2 -translate-y-1/2" />
@@ -597,7 +596,7 @@ export default function SensorDashboard() {
                 </span>
               </div>
               <div className="h-3 w-full bg-slate-950/60 border border-slate-800/80 rounded-full overflow-hidden relative">
-                <motion.div 
+                <motion.div
                   className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
                   animate={{ width: `${Math.min(Math.abs(latestData.x) * 100, 100)}%` }}
                   transition={{ type: "spring", stiffness: 80, damping: 15 }}
@@ -614,7 +613,7 @@ export default function SensorDashboard() {
                 </span>
               </div>
               <div className="h-3 w-full bg-slate-950/60 border border-slate-800/80 rounded-full overflow-hidden">
-                <motion.div 
+                <motion.div
                   className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
                   animate={{ width: `${Math.min(Math.abs(latestData.y) * 100, 100)}%` }}
                   transition={{ type: "spring", stiffness: 80, damping: 15 }}
@@ -631,7 +630,7 @@ export default function SensorDashboard() {
                 </span>
               </div>
               <div className="h-3 w-full bg-slate-950/60 border border-slate-800/80 rounded-full overflow-hidden">
-                <motion.div 
+                <motion.div
                   className="h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full"
                   animate={{ width: `${Math.min(Math.abs(latestData.z) * 100, 100)}%` }}
                   transition={{ type: "spring", stiffness: 80, damping: 15 }}
@@ -656,7 +655,7 @@ export default function SensorDashboard() {
       </div>
 
       {/* Footer Diagnostic Panel */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.5 }}
