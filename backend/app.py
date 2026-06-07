@@ -51,6 +51,7 @@ async def hardware_endpoint(websocket: WebSocket):
 # --- ENDPOINT 2: Dedicated path for your Vercel Browser to listen ---
 @app.websocket("/ws/frontend")
 async def frontend_endpoint(websocket: WebSocket):
+    await websocket.accept()
     await manager.connect_frontend(websocket)
     try:
         while True:
